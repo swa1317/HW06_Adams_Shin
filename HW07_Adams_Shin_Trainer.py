@@ -520,10 +520,14 @@ def check_depth(filename):
 
     depth_range = list(range(MIN_DEPTH, MAX_DEPTH))
 
+    plt.bar(depth_range, error_rate)
+    plt.xlabel('Depths')
+    plt.ylabel('Number of Mistakes')
+    plt.title('Depth Versus Mistakes')
+    plt.show()
+
     print(depth_range)
     print(error_rate)
-
-    # add graph here
 
     print("=================================================")
 
