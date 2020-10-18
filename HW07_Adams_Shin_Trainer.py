@@ -13,6 +13,11 @@ import time
 #                              #
 ################################
 
+# PARAMETERS
+MIN_DEPTH = 2
+MAX_DEPTH = (5) + 1
+MIN_DATA_RECORDS = 10
+NODE_PURITY = 0.90
 
 
 class Node:
@@ -212,14 +217,14 @@ def get_lowest_gini_on_col_bool(data, col_index):
     threshold = 0.5
     return gini, threshold, col_index
 
-def train(data):
+def train(data, max_depth):
     """
     data: the 2d numpy dataset that includes the true class column at the end
     return: the decision tree
     """
-    return _grow_tree(data)
+    return _grow_tree(data, max_depth)
 
-def _grow_tree(data, depth=0):
+def _grow_tree(data, max_depth, depth=0):
     """
     data: the 2d numpy dataset that includes the true class column at the end
     depth: the depth of the decision tree
@@ -231,11 +236,9 @@ def _grow_tree(data, depth=0):
     min data size is 10
     accuracy threshold is 0.95
     """
-    MAX_DEPTH = 6
-    MIN_DATA_SIZE = 10
-    ACC_THRESH = 0.95
 
-    if depth < MAX_DEPTH and data.shape[0] >= MIN_DATA_SIZE:
+
+    if depth < max_depth and data.shape[0] >= MIN_DATA_RECORDS:
         # np.unique -> gets unique elements in array
         # values: sorted unique values
         # count: sorted unique value frequency
@@ -245,7 +248,7 @@ def _grow_tree(data, depth=0):
         # sum() -> summation of list
         predicted_class_accuracy = counts[values_and_counts_index] / sum(counts)
 
-        if predicted_class_accuracy < ACC_THRESH:
+        if predicted_class_accuracy < NODE_PURITY:
             predicted_class = values[values_and_counts_index]
             node = Node(predicted_class=predicted_class)
 
@@ -280,8 +283,8 @@ def _grow_tree(data, depth=0):
             data_below_threshold = data_below_threshold.reshape(-1, 8)
             data_above_threshold = data_above_threshold.reshape(-1, 8)
 
-            node.left = _grow_tree(data_below_threshold, depth + 1)
-            node.right = _grow_tree(data_above_threshold, depth + 1)
+            node.left = _grow_tree(data_below_threshold, max_depth, depth + 1)
+            node.right = _grow_tree(data_above_threshold, max_depth, depth + 1)
 
             return node
         else:
@@ -478,18 +481,19 @@ def confusion_matrix(results, actual_values):
 
     print("TP: " + str(TP) + " FP: " + str(FP) + " FN: " + str(FN) + " TN: " + str(TN) + "\n")
 
-def check_accuracy(train_batch, test_batch):
+def check_mistakes(train_batch, test_batch, max_depth):
     """
     data: the 2d data.
-    return: the accuracy in decimal
+    return: the number of mistakes
     The data should contain the true class column at the end.
     """
-    tree = train(train_batch)
+    tree = train(train_batch, max_depth)
     results = predict(test_batch, tree)
-    true_results = get_col_data(data, -1)
+    true_results = get_col_data(test_batch, -1)
     (values, counts) = np.unique(true_results == results, return_counts=True)
-    accuracy = (counts[0] if values[0] else counts[1]) / (sum(counts))
-    return accuracy
+    number_of_mistakes = counts[0] if not values[0] else counts[1]
+    return number_of_mistakes
+
 
 if __name__ == '__main__':
     # filename = "Abominable_Data_HW05_v725.csv"
@@ -501,26 +505,28 @@ if __name__ == '__main__':
 
         parameter = parameter[0]
         data = csv_to_array(parameter)
-        # tree = train(data)
-        # writeClassifierProgram(tree)
-        #
-        # accuracy = check_accuracy(data)
-        #
-        # end = time.time()
-        # print("Accuracy: {0}".format(accuracy))
-        # print("{0} seconds".format((end - start)))
+
         batch_count = 10
         batches = np.split(data, batch_count, axis=0)  # batch_count = number of batches
 
-        for test_index in range(len(batches)):
-            test_batch = batches[test_index]
-            train_indexes = []
-            for train_index in range(len(batches)):
-                if test_index != train_index:
-                    train_indexes.append(train_index)
-            train_batch = np.concatenate(list(map(lambda x: batches[x], [1, 2, 3, 4, 5, 6, 7, 8, 9])), axis=0)
-            tree = train(train_batch)
-            print()
-        print(batches)
+        error_rate = []
+        for tree_depth in range(MIN_DEPTH, MAX_DEPTH):
+            number_of_mistakes = 0
+            for test_index in range(len(batches)):
+                test_batch = batches[test_index]
+                train_indexes = []
+                for train_index in range(len(batches)):
+                    if test_index != train_index:
+                        train_indexes.append(train_index)
+                train_batch = np.concatenate(list(map(lambda x: batches[x], train_indexes)), axis=0)
+                number_of_mistakes = number_of_mistakes + check_mistakes(train_batch, test_batch,tree_depth)
+                print("{0} | {1}".format(tree_depth, test_index))
+            error_rate.append(number_of_mistakes)
+
+        depth_range = list(range(MIN_DEPTH, MAX_DEPTH))
+
+        print(depth_range)
+        print(error_rate)
+
         end = time.time()
         print("{0} seconds".format((end - start)))
