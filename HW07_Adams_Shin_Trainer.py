@@ -498,10 +498,16 @@ def check_depth(filename):
 
     depth_range = list(range(MIN_DEPTH, MAX_DEPTH))
 
+    fig, ax = plt.subplots()
+    ax.set(ylim=[150, 250])
+    plt.bar(depth_range, error_rate)
+    plt.xlabel('Depths')
+    plt.ylabel('Number of Mistakes')
+    plt.title('Depth Versus Mistakes')
+    plt.show()
+
     print("The x value: {0}".format(depth_range))
     print("The y value: {0}".format(error_rate))
-
-    # add graph here
 
     print("=================================================")
     index_of_min_error_rate = error_rate.index(min(error_rate))
