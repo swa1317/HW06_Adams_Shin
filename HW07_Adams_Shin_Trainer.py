@@ -14,11 +14,6 @@ import time
 ################################
 
 # PARAMETERS
-MIN_DEPTH = 0
-MAX_DEPTH = 0
-MIN_DATA_RECORDS = 10
-NODE_PURITY = 0.90
-
 START = time.time()
 
 class Node:
@@ -218,14 +213,14 @@ def get_lowest_gini_on_col_bool(data, col_index):
     threshold = 0.5
     return gini, threshold, col_index
 
-def train(data, max_depth):
+def train(data, max_depth, min_data_records, node_purity):
     """
     data: the 2d numpy dataset that includes the true class column at the end
     return: the decision tree
     """
-    return _grow_tree(data, max_depth)
+    return _grow_tree(data, max_depth, min_data_records, node_purity)
 
-def _grow_tree(data, max_depth, depth=0):
+def _grow_tree(data, max_depth, min_data_records, node_purity, depth=0):
     """
     data: the 2d numpy dataset that includes the true class column at the end
     depth: the depth of the decision tree
@@ -239,7 +234,7 @@ def _grow_tree(data, max_depth, depth=0):
     """
 
 
-    if depth < max_depth and data.shape[0] >= MIN_DATA_RECORDS:
+    if depth < max_depth and data.shape[0] >= min_data_records:
         # np.unique -> gets unique elements in array
         # values: sorted unique values
         # count: sorted unique value frequency
@@ -249,7 +244,7 @@ def _grow_tree(data, max_depth, depth=0):
         # sum() -> summation of list
         predicted_class_accuracy = counts[values_and_counts_index] / sum(counts)
 
-        if predicted_class_accuracy < NODE_PURITY:
+        if predicted_class_accuracy < node_purity:
             predicted_class = values[values_and_counts_index]
             node = Node(predicted_class=predicted_class)
 
@@ -284,8 +279,8 @@ def _grow_tree(data, max_depth, depth=0):
             data_below_threshold = data_below_threshold.reshape(-1, 8)
             data_above_threshold = data_above_threshold.reshape(-1, 8)
 
-            node.left = _grow_tree(data_below_threshold, max_depth, depth + 1)
-            node.right = _grow_tree(data_above_threshold, max_depth, depth + 1)
+            node.left = _grow_tree(data_below_threshold, max_depth, min_data_records, node_purity, depth + 1)
+            node.right = _grow_tree(data_above_threshold, max_depth, min_data_records, node_purity, depth + 1)
 
             return node
         else:
@@ -463,32 +458,13 @@ if __name__ == '__main__':
 \t\tpredict(data)
 '''
 
-# Function that calculated confusion matrix values given the results of the predict using the decision tree on training
-# data, as well as given the actual class values to compare the predictions to.
-def confusion_matrix(results, actual_values):
-    TP = 0
-    FP = 0
-    FN = 0
-    TN = 0
-    for row_index in range(results.shape[0]):
-        if results[row_index] == 0 and actual_values[row_index] == 0:
-            TP += 1
-        elif results[row_index] == 0 and actual_values[row_index] == 1:
-            FP += 1
-        elif results[row_index] == 1 and actual_values[row_index] == 1:
-            TN += 1
-        elif results[row_index] == 1 and actual_values[row_index] == 0:
-            FN += 1
-
-    print("TP: " + str(TP) + " FP: " + str(FP) + " FN: " + str(FN) + " TN: " + str(TN) + "\n")
-
-def check_mistakes(train_batch, test_batch, max_depth):
+def check_mistakes(train_batch, test_batch, max_depth, min_data_records, node_purity):
     """
     data: the 2d data.
     return: the number of mistakes
     The data should contain the true class column at the end.
     """
-    tree = train(train_batch, max_depth)
+    tree = train(train_batch, max_depth, min_data_records, node_purity)
     results = predict(test_batch, tree)
     true_results = get_col_data(test_batch, -1)
     (values, counts) = np.unique(true_results == results, return_counts=True)
@@ -498,6 +474,8 @@ def check_mistakes(train_batch, test_batch, max_depth):
 def check_depth(filename):
     MIN_DEPTH = 2
     MAX_DEPTH = (5) + 1
+    MIN_DATA_RECORDS = 10
+    NODE_PURITY = 0.90
     data = csv_to_array(filename)
 
     batch_count = 10
@@ -514,20 +492,82 @@ def check_depth(filename):
                 if test_index != train_index:
                     train_indexes.append(train_index)
             train_batch = np.concatenate(list(map(lambda x: batches[x], train_indexes)), axis=0)
-            number_of_mistakes = number_of_mistakes + check_mistakes(train_batch, test_batch, tree_depth)
+            number_of_mistakes = number_of_mistakes + check_mistakes(train_batch, test_batch, tree_depth, MIN_DATA_RECORDS, NODE_PURITY)
             print("Tree Depth: {0} | Test Index: {1} | TIME: {2:.2f} seconds".format(tree_depth, test_index, time.time() - START))
         error_rate.append(number_of_mistakes)
 
     depth_range = list(range(MIN_DEPTH, MAX_DEPTH))
 
-    print(depth_range)
-    print(error_rate)
+    print("The x value: {0}".format(depth_range))
+    print("The y value: {0}".format(error_rate))
 
     # add graph here
 
     print("=================================================")
+    index_of_min_error_rate = error_rate.index(min(error_rate))
+    return depth_range, error_rate, depth_range[index_of_min_error_rate]
 
+def check_data_records(filename, best_depth):
+    NODE_PURITY = 0.90
+    min_data_records_list = [30, 25, 20, 15, 10, 8, 6, 5, 4, 3, 2]
+    data = csv_to_array(filename)
 
+    batch_count = 10
+    batches = np.split(data, batch_count, axis=0)  # batch_count = number of batches
+
+    error_rate = []
+    print("=================================================")
+    for min_data_records in min_data_records_list:
+        number_of_mistakes = 0
+        for test_index in range(len(batches)):
+            test_batch = batches[test_index]
+            train_indexes = []
+            for train_index in range(len(batches)):
+                if test_index != train_index:
+                    train_indexes.append(train_index)
+            train_batch = np.concatenate(list(map(lambda x: batches[x], train_indexes)), axis=0)
+            number_of_mistakes = number_of_mistakes + check_mistakes(train_batch, test_batch, best_depth, min_data_records, NODE_PURITY)
+            print("Min Data Records: {0} | Test Index: {1} | TIME: {2:.2f} seconds".format(min_data_records, test_index, time.time() - START))
+        error_rate.append(number_of_mistakes)
+
+    print("The x value: {0}".format(min_data_records_list))
+    print("The y value: {0}".format(error_rate))
+    # add graph here
+
+    print("=================================================")
+    index_of_min_error_rate = error_rate.index(min(error_rate))
+    return min_data_records_list, error_rate, min_data_records_list[index_of_min_error_rate]
+
+def check_node_purity(filename, best_depth, best_min_data_records):
+    node_purity_list = [70, 75, 80, 85, 90, 95, 96, 98]
+    data = csv_to_array(filename)
+
+    batch_count = 10
+    batches = np.split(data, batch_count, axis=0)  # batch_count = number of batches
+
+    error_rate = []
+    print("=================================================")
+    for node_purity in node_purity_list:
+        number_of_mistakes = 0
+        for test_index in range(len(batches)):
+            test_batch = batches[test_index]
+            train_indexes = []
+            for train_index in range(len(batches)):
+                if test_index != train_index:
+                    train_indexes.append(train_index)
+            train_batch = np.concatenate(list(map(lambda x: batches[x], train_indexes)), axis=0)
+            number_of_mistakes = number_of_mistakes + check_mistakes(train_batch, test_batch, best_depth, best_min_data_records, node_purity)
+            print("Node Purity: {0} | Test Index: {1} | TIME: {2:.2f} seconds".format(node_purity, test_index, time.time() - START))
+        error_rate.append(number_of_mistakes)
+
+    print("The x value: {0}".format(node_purity_list))
+    print("The y value: {0}".format(error_rate))
+    # add graph here
+
+    print("=================================================")
+    index_of_min_error_rate = error_rate.index(min(error_rate))
+
+    return node_purity_list, error_rate, node_purity_list[index_of_min_error_rate]
 
 if __name__ == '__main__':
     # filename = "Abominable_Data_HW05_v725.csv"
@@ -536,4 +576,9 @@ if __name__ == '__main__':
         print("the parameter is empty")
     else:
         parameter = parameter[0]
-        check_depth(parameter)
+        depth_range, depth_error_rate, best_depth = check_depth(parameter)
+        min_data_records_list, data_records_error_rate, best_min_data_records = check_data_records(parameter, best_depth)
+        node_purity_list, node_purity_error_rate, best_node_purity = check_node_purity(parameter, best_depth, best_min_data_records)
+        print(depth_range, depth_error_rate, best_depth)
+        print(min_data_records_list, data_records_error_rate, best_min_data_records)
+        print(node_purity_list, node_purity_error_rate, best_node_purity)
