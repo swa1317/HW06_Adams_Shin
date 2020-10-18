@@ -494,13 +494,18 @@ if __name__ == '__main__':
 
         parameter = parameter[0]
         data = csv_to_array(parameter)
-        tree = train(data)
-        writeClassifierProgram(tree)
+        # tree = train(data)
+        # writeClassifierProgram(tree)
+        #
+        # accuracy = check_accuracy(data)
+        #
+        # end = time.time()
+        # print("Accuracy: {0}".format(accuracy))
+        # print("{0} seconds".format((end - start)))
+        batch_count = 10
+        batches = np.split(data, batch_count, axis=0)  # batch_count = number of batches
+        for test_index in range(len(batches)):
+            test_batch = batches[test_index]
 
-        accuracy = check_accuracy(data)
-
-        end = time.time()
-        print("Accuracy: {0}".format(accuracy))
-        print("{0} seconds".format((end - start)))
-
-
+            # train_batch = np.concatenate((a, b), axis=0)
+        print(batches)
