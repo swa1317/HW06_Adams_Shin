@@ -423,6 +423,15 @@ function_string = '''
 def csv_to_array_trained(csv_filename):
 \tcsv_pandas = pd.read_csv(csv_filename)
 \tattributes_with_class = csv_pandas[['Age', 'Ht', 'TailLn', 'HairLn', 'BangLn', 'Reach', 'EarLobes']].copy()
+
+\t# quantizing the data
+\tattributes['Age'] = attributes['Age'].apply(lambda x: quantize(x, 2))
+\tattributes['Ht'] = attributes['Ht'].apply(lambda x: quantize(x, 5))
+\tattributes['TailLn'] = attributes['TailLn'].apply(lambda x: quantize(x, 1))
+\tattributes['HairLn'] = attributes['HairLn'].apply(lambda x: quantize(x, 1))
+\tattributes['BangLn'] = attributes['BangLn'].apply(lambda x: quantize(x, 1))
+\tattributes['Reach'] = attributes['Reach'].apply(lambda x: quantize(x, 1))
+
 \tdata = attributes_with_class.to_numpy()
 \treturn data
 '''
