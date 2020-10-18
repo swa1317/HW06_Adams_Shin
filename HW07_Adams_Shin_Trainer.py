@@ -14,11 +14,12 @@ import time
 ################################
 
 # PARAMETERS
-MIN_DEPTH = 2
-MAX_DEPTH = (5) + 1
+MIN_DEPTH = 0
+MAX_DEPTH = 0
 MIN_DATA_RECORDS = 10
 NODE_PURITY = 0.90
 
+START = time.time()
 
 class Node:
     """
@@ -494,6 +495,39 @@ def check_mistakes(train_batch, test_batch, max_depth):
     number_of_mistakes = counts[0] if not values[0] else counts[1]
     return number_of_mistakes
 
+def check_depth(filename):
+    MIN_DEPTH = 2
+    MAX_DEPTH = (5) + 1
+    data = csv_to_array(filename)
+
+    batch_count = 10
+    batches = np.split(data, batch_count, axis=0)  # batch_count = number of batches
+
+    error_rate = []
+    print("=================================================")
+    for tree_depth in range(MIN_DEPTH, MAX_DEPTH):
+        number_of_mistakes = 0
+        for test_index in range(len(batches)):
+            test_batch = batches[test_index]
+            train_indexes = []
+            for train_index in range(len(batches)):
+                if test_index != train_index:
+                    train_indexes.append(train_index)
+            train_batch = np.concatenate(list(map(lambda x: batches[x], train_indexes)), axis=0)
+            number_of_mistakes = number_of_mistakes + check_mistakes(train_batch, test_batch, tree_depth)
+            print("Tree Depth: {0} | Test Index: {1} | TIME: {2:.2f} seconds".format(tree_depth, test_index, time.time() - START))
+        error_rate.append(number_of_mistakes)
+
+    depth_range = list(range(MIN_DEPTH, MAX_DEPTH))
+
+    print(depth_range)
+    print(error_rate)
+
+    # add graph here
+
+    print("=================================================")
+
+
 
 if __name__ == '__main__':
     # filename = "Abominable_Data_HW05_v725.csv"
@@ -501,32 +535,5 @@ if __name__ == '__main__':
     if len(parameter) == 0:
         print("the parameter is empty")
     else:
-        start = time.time()
-
         parameter = parameter[0]
-        data = csv_to_array(parameter)
-
-        batch_count = 10
-        batches = np.split(data, batch_count, axis=0)  # batch_count = number of batches
-
-        error_rate = []
-        for tree_depth in range(MIN_DEPTH, MAX_DEPTH):
-            number_of_mistakes = 0
-            for test_index in range(len(batches)):
-                test_batch = batches[test_index]
-                train_indexes = []
-                for train_index in range(len(batches)):
-                    if test_index != train_index:
-                        train_indexes.append(train_index)
-                train_batch = np.concatenate(list(map(lambda x: batches[x], train_indexes)), axis=0)
-                number_of_mistakes = number_of_mistakes + check_mistakes(train_batch, test_batch,tree_depth)
-                print("{0} | {1}".format(tree_depth, test_index))
-            error_rate.append(number_of_mistakes)
-
-        depth_range = list(range(MIN_DEPTH, MAX_DEPTH))
-
-        print(depth_range)
-        print(error_rate)
-
-        end = time.time()
-        print("{0} seconds".format((end - start)))
+        check_depth(parameter)
