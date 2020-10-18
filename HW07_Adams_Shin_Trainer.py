@@ -469,17 +469,15 @@ def confusion_matrix(results, actual_values):
 
     print("TP: " + str(TP) + " FP: " + str(FP) + " FN: " + str(FN) + " TN: " + str(TN) + "\n")
 
-def check_accuracy(data):
+def check_accuracy(train_batch, test_batch):
     """
     data: the 2d data.
     return: the accuracy in decimal
     The data should contain the true class column at the end.
     """
-    tree = train(data)
-    writeClassifierProgram(tree)
-    results = predict(data, tree)
+    tree = train(train_batch)
+    results = predict(test_batch, tree)
     true_results = get_col_data(data, -1)
-    confusion_matrix(results, true_results)
     (values, counts) = np.unique(true_results == results, return_counts=True)
     accuracy = (counts[0] if values[0] else counts[1]) / (sum(counts))
     return accuracy
@@ -504,8 +502,16 @@ if __name__ == '__main__':
         # print("{0} seconds".format((end - start)))
         batch_count = 10
         batches = np.split(data, batch_count, axis=0)  # batch_count = number of batches
+
         for test_index in range(len(batches)):
             test_batch = batches[test_index]
-
-            # train_batch = np.concatenate((a, b), axis=0)
+            train_indexes = []
+            for train_index in range(len(batches)):
+                if test_index != train_index:
+                    train_indexes.append(train_index)
+            train_batch = np.concatenate(list(map(lambda x: batches[x], [1, 2, 3, 4, 5, 6, 7, 8, 9])), axis=0)
+            tree = train(train_batch)
+            print()
         print(batches)
+        end = time.time()
+        print("{0} seconds".format((end - start)))
