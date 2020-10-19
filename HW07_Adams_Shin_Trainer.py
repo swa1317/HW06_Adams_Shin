@@ -488,6 +488,7 @@ def check_depth(filename):
 
     error_rate = []
     print("=================================================")
+    # loop through all depths, generate tree, check number of mistakes and keep track of these mistakes in error_rate.
     for tree_depth in range(MIN_DEPTH, MAX_DEPTH):
         number_of_mistakes = 0
         for test_index in range(len(batches)):
@@ -503,11 +504,11 @@ def check_depth(filename):
 
     depth_range = list(range(MIN_DEPTH, MAX_DEPTH))
 
-    plt.bar(depth_range, error_rate)
+    plt.bar(depth_range, error_rate) # plot depth versus error rate with x, y label and title
     plt.xlabel('Depths')
     plt.ylabel('Number of Mistakes')
     plt.title('Depth Versus Mistakes')
-    plt.savefig('DepthVersusMistakes.png')
+    plt.savefig('DepthVersusMistakes.png') # save figure
     plt.show()
 
     print("The x value: {0}".format(depth_range))
@@ -519,7 +520,7 @@ def check_depth(filename):
 
 def check_data_records(filename, best_depth):
     NODE_PURITY = 0.90
-    min_data_records_list = [30, 25, 20, 15, 10, 8, 6, 5, 4, 3, 2]
+    min_data_records_list = [30, 25, 20, 15, 10, 8, 6, 5, 4, 3, 2] # node size options
     data = csv_to_array(filename)
 
     batch_count = 10
@@ -527,6 +528,7 @@ def check_data_records(filename, best_depth):
 
     error_rate = []
     print("=================================================")
+    # loop through all node sizes, generate tree, check number of mistakes and keep track of these mistakes in error_rate.
     for min_data_records in min_data_records_list:
         number_of_mistakes = 0
         for test_index in range(len(batches)):
@@ -544,11 +546,11 @@ def check_data_records(filename, best_depth):
     print("The y value: {0}".format(error_rate))
     # add graph here
 
-    plt.bar(min_data_records_list, error_rate)
-    plt.xlabel('Minimum Node Size')
-    plt.ylabel('Number of Mistakes')
-    plt.title('Minimum Node Size Versus Mistakes')
-    plt.savefig('MinNodeSize.png')
+    plt.bar(min_data_records_list, error_rate)  # plot min node versus error rate
+    plt.xlabel('Minimum Node Size') # x label
+    plt.ylabel('Number of Mistakes') # y label
+    plt.title('Minimum Node Size Versus Mistakes') #title
+    plt.savefig('MinNodeSize.png') # save figure
     plt.show()
 
     print("=================================================")
@@ -556,7 +558,7 @@ def check_data_records(filename, best_depth):
     return min_data_records_list, error_rate, min_data_records_list[index_of_min_error_rate]
 
 def check_node_purity(filename, best_depth, best_min_data_records):
-    node_purity_list = [70, 75, 80, 85, 90, 95, 96, 98]
+    node_purity_list = [70, 75, 80, 85, 90, 95, 96, 98] # purity options
     data = csv_to_array(filename)
 
     batch_count = 10
@@ -564,6 +566,7 @@ def check_node_purity(filename, best_depth, best_min_data_records):
 
     error_rate = []
     print("=================================================")
+    # loop through all purities, generate tree, check number of mistakes and keep track of these mistakes in error_rate.
     for node_purity in node_purity_list:
         number_of_mistakes = 0
         for test_index in range(len(batches)):
@@ -581,11 +584,11 @@ def check_node_purity(filename, best_depth, best_min_data_records):
     print("The y value: {0}".format(error_rate))
     # add graph here
 
-    plt.bar(node_purity_list, error_rate)
+    plt.bar(node_purity_list, error_rate) # plot node purity versus error rate with x, y label and title
     plt.xlabel('Node Purity')
     plt.ylabel('Number of Mistakes')
     plt.title('Node Purity Versus Mistakes')
-    plt.savefig('NodePurity.png')
+    plt.savefig('NodePurity.png') # save figure
     plt.show()
 
     print("=================================================")
