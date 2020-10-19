@@ -389,7 +389,7 @@ def recurseTreeToConditional(tree_node, file_object, tab_index):
 # function that writes the nested if-else statements, finish by printing and writing classification and then close
 # the file object
 def writeClassifierProgram(tree):
-    trained_program_filename = "HW05_Classifier_Adams_Shin.py"
+    trained_program_filename = "HW07_Classifier_Adams_Shin.py"
     file_object = open(trained_program_filename, "wt")  # create file
 
     file_object.write(import_string)
@@ -422,14 +422,6 @@ function_string = '''
 def csv_to_array_trained(csv_filename):
 \tcsv_pandas = pd.read_csv(csv_filename)
 \tattributes_with_class = csv_pandas[['Age', 'Ht', 'TailLn', 'HairLn', 'BangLn', 'Reach', 'EarLobes']].copy()
-
-\t# quantizing the data
-\tattributes['Age'] = attributes['Age'].apply(lambda x: quantize(x, 2))
-\tattributes['Ht'] = attributes['Ht'].apply(lambda x: quantize(x, 5))
-\tattributes['TailLn'] = attributes['TailLn'].apply(lambda x: quantize(x, 1))
-\tattributes['HairLn'] = attributes['HairLn'].apply(lambda x: quantize(x, 1))
-\tattributes['BangLn'] = attributes['BangLn'].apply(lambda x: quantize(x, 1))
-\tattributes['Reach'] = attributes['Reach'].apply(lambda x: quantize(x, 1))
 
 \tdata = attributes_with_class.to_numpy()
 \treturn data
@@ -598,9 +590,14 @@ if __name__ == '__main__':
         print("the parameter is empty")
     else:
         parameter = parameter[0]
-        depth_range, depth_error_rate, best_depth = check_depth(parameter)
-        min_data_records_list, data_records_error_rate, best_min_data_records = check_data_records(parameter, best_depth)
-        node_purity_list, node_purity_error_rate, best_node_purity = check_node_purity(parameter, best_depth, best_min_data_records)
-        print(depth_range, depth_error_rate, best_depth)
-        print(min_data_records_list, data_records_error_rate, best_min_data_records)
-        print(node_purity_list, node_purity_error_rate, best_node_purity)
+        # depth_range, depth_error_rate, best_depth = check_depth(parameter)
+        # min_data_records_list, data_records_error_rate, best_min_data_records = check_data_records(parameter, best_depth)
+        # node_purity_list, node_purity_error_rate, best_node_purity = check_node_purity(parameter, best_depth, best_min_data_records)
+        # print(depth_range, depth_error_rate, best_depth)
+        # print(min_data_records_list, data_records_error_rate, best_min_data_records)
+        # print(node_purity_list, node_purity_error_rate, best_node_purity)
+
+        data = csv_to_array(parameter)
+        tree = _grow_tree(data, 4, 25, 70)
+        writeClassifierProgram(tree)
+
