@@ -16,25 +16,28 @@ def predict(data):
 	file_object = open(classifications_filename, "wt")  # create file
 
 	for row in data:
-		if( row[2] < 10.890758167613635):
-			if( row[6] < 0.5):
-				if( row[2] < 7.0625):
+		if( row[2] < 9.8814697265625):
+			if( row[3] < 8.86363636363636):
+				if( row[2] < 6.9449573863636385):
 					class_val="+1"
 				else:
 					class_val="+1"
 			else:
-				if( row[3] < 5.875):
+				if( row[2] < 8.990411931818183):
 					class_val="+1"
 				else:
 					class_val="+1"
 		else:
-			if( row[3] < 10.971058238636369):
-				if( row[2] < 15.83203125):
+			if( row[3] < 9.816938920454549):
+				if( row[4] < 5.863636363636367):
 					class_val="-1"
 				else:
 					class_val="-1"
 			else:
-				class_val="-1"
+				if( row[4] < 4.136363636363636):
+					class_val="-1"
+				else:
+					class_val="+1"
 		print(class_val)
 		file_object.write(class_val + '\n')
 	file_object.close()

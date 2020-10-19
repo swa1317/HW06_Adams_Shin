@@ -573,8 +573,8 @@ def check_node_purity(filename, best_depth, best_min_data_records):
                 if test_index != train_index:
                     train_indexes.append(train_index)
             train_batch = np.concatenate(list(map(lambda x: batches[x], train_indexes)), axis=0)
-            number_of_mistakes = number_of_mistakes + check_mistakes(train_batch, test_batch, best_depth, best_min_data_records, node_purity)
-            print("Node Purity: {0} | Test Index: {1} | TIME: {2:.2f} seconds".format(node_purity, test_index, time.time() - START))
+            number_of_mistakes = number_of_mistakes + check_mistakes(train_batch, test_batch, best_depth, best_min_data_records, (node_purity * 0.01))
+            print("Node Purity: {0} | Test Index: {1} | TIME: {2:.2f} seconds".format((node_purity * 0.01), test_index, time.time() - START))
         error_rate.append(number_of_mistakes)
 
     print("The x value: {0}".format(node_purity_list))
@@ -600,15 +600,15 @@ if __name__ == '__main__':
         print("the parameter is empty")
     else:
         parameter = parameter[0]
-        # depth_range, depth_error_rate, best_depth = check_depth(parameter)
-        # min_data_records_list, data_records_error_rate, best_min_data_records = check_data_records(parameter, best_depth)
-        # node_purity_list, node_purity_error_rate, best_node_purity = check_node_purity(parameter, best_depth, best_min_data_records)
-        # print(depth_range, depth_error_rate, best_depth)
-        # print(min_data_records_list, data_records_error_rate, best_min_data_records)
-        # print(node_purity_list, node_purity_error_rate, best_node_purity)
+        depth_range, depth_error_rate, best_depth = check_depth("train_400.csv")
+        min_data_records_list, data_records_error_rate, best_min_data_records = check_data_records(parameter, best_depth)
+        node_purity_list, node_purity_error_rate, best_node_purity = check_node_purity(parameter, best_depth, best_min_data_records)
+        print(depth_range, depth_error_rate, best_depth)
+        print(min_data_records_list, data_records_error_rate, best_min_data_records)
+        print(node_purity_list, node_purity_error_rate, best_node_purity)
 
         data = csv_to_array(parameter)
-        tree = _grow_tree(data, 4, 25, 70)
+        tree = _grow_tree(data, 4, 25, best_node_purity)
         writeClassifierProgram(tree)
         data = csv_to_array(parameter)
         accuracy = check_accuracy(data, 4, 25, 70)
