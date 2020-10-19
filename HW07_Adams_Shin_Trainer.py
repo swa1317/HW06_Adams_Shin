@@ -458,6 +458,19 @@ if __name__ == '__main__':
 \t\tpredict(data)
 '''
 
+def check_accuracy(data, max_depth, min_data_records, node_purity):
+    """
+    data: the 2d data.
+    return: the accuracy in decimal
+    The data should contain the true class column at the end.
+    """
+    tree = train(data, max_depth, min_data_records, node_purity)
+    results = predict(data, tree)
+    true_results = get_col_data(data, -1)
+    (values, counts) = np.unique(true_results == results, return_counts=True)
+    accuracy = (counts[0] if values[0] else counts[1]) / (sum(counts))
+    return accuracy
+
 def check_mistakes(train_batch, test_batch, max_depth, min_data_records, node_purity):
     """
     data: the 2d data.
@@ -604,3 +617,6 @@ if __name__ == '__main__':
         print(depth_range, depth_error_rate, best_depth)
         print(min_data_records_list, data_records_error_rate, best_min_data_records)
         print(node_purity_list, node_purity_error_rate, best_node_purity)
+        data = csv_to_array("Abominable_Data_HW05_v725.csv")
+        accuracy = check_accuracy(data, best_depth, best_min_data_records, best_node_purity)
+        print(accuracy)
