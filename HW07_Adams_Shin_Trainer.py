@@ -610,7 +610,7 @@ if __name__ == '__main__':
         data = csv_to_array(parameter)
         tree = _grow_tree(data, 4, 25, 70)
         writeClassifierProgram(tree)
-        data = csv_to_array("Abominable_Data_HW05_v725.csv")
+        data = csv_to_array(parameter)
         accuracy = check_accuracy(data, 4, 25, 70)
         print(accuracy)
 
