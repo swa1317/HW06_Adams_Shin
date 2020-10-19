@@ -216,6 +216,9 @@ def get_lowest_gini_on_col_bool(data, col_index):
 def train(data, max_depth, min_data_records, node_purity):
     """
     data: the 2d numpy dataset that includes the true class column at the end
+    max_depth: the maximum depth
+    min_data_records: the minimum data records
+    node_purity: the purity value. need to be in decimal
     return: the decision tree
     """
     return _grow_tree(data, max_depth, min_data_records, node_purity)
@@ -223,6 +226,9 @@ def train(data, max_depth, min_data_records, node_purity):
 def _grow_tree(data, max_depth, min_data_records, node_purity, depth=0):
     """
     data: the 2d numpy dataset that includes the true class column at the end
+    max_depth: the maximum depth
+    min_data_records: the minimum data records
+    node_purity: the purity value. need to be in decimal
     depth: the depth of the decision tree
     return: the decision tree
 
@@ -453,6 +459,9 @@ if __name__ == '__main__':
 def check_accuracy(data, max_depth, min_data_records, node_purity):
     """
     data: the 2d data.
+    max_depth: the maximum depth
+    min_data_records: the minimum data records
+    node_purity: the purity value. need to be in decimal
     return: the accuracy in decimal
     The data should contain the true class column at the end.
     """
@@ -465,7 +474,11 @@ def check_accuracy(data, max_depth, min_data_records, node_purity):
 
 def check_mistakes(train_batch, test_batch, max_depth, min_data_records, node_purity):
     """
-    data: the 2d data.
+    train_batch: the training data
+    test_batch: the testing data
+    max_depth: the maximum depth
+    min_data_records: the minimum data records
+    node_purity: the purity value. need to be in decimal
     return: the number of mistakes
     The data should contain the true class column at the end.
     """
@@ -477,6 +490,13 @@ def check_mistakes(train_batch, test_batch, max_depth, min_data_records, node_pu
     return number_of_mistakes
 
 def check_depth(filename):
+    """
+    filename: the filename of the csv file
+    return:
+        depth_range -> list of depth
+        error_rate -> list of error rate
+        best depth
+    """
     MIN_DEPTH = 2
     MAX_DEPTH = (5) + 1
     MIN_DATA_RECORDS = 10
@@ -519,6 +539,14 @@ def check_depth(filename):
     return depth_range, error_rate, depth_range[index_of_min_error_rate]
 
 def check_data_records(filename, best_depth):
+    """
+    filename: the filename of the csv file
+    best_depth: the value of best depth
+    return:
+        min_data_records_list -> list of min data records
+        error_rate -> list of error rate
+        best min data records
+    """
     NODE_PURITY = 0.90
     min_data_records_list = [30, 25, 20, 15, 10, 8, 6, 5, 4, 3, 2] # node size options
     data = csv_to_array(filename)
@@ -558,6 +586,15 @@ def check_data_records(filename, best_depth):
     return min_data_records_list, error_rate, min_data_records_list[index_of_min_error_rate]
 
 def check_node_purity(filename, best_depth, best_min_data_records):
+    """
+    filename: the filename of the csv file
+    best_depth: the value of best depth
+    best_min_data_records: the value of best min data records
+    return:
+        node_purity_list -> list of min data records
+        error_rate -> list of error rate
+        best value of node purity
+    """
     node_purity_list = [70, 75, 80, 85, 90, 95, 96, 98] # purity options
     data = csv_to_array(filename)
 
@@ -604,16 +641,16 @@ if __name__ == '__main__':
     else:
         parameter = parameter[0]
         depth_range, depth_error_rate, best_depth = check_depth("train_400.csv")
-        min_data_records_list, data_records_error_rate, best_min_data_records = check_data_records(parameter, best_depth)
-        node_purity_list, node_purity_error_rate, best_node_purity = check_node_purity(parameter, best_depth, best_min_data_records)
+        min_data_records_list, data_records_error_rate, best_min_data_records = check_data_records("train_400.csv", best_depth)
+        node_purity_list, node_purity_error_rate, best_node_purity = check_node_purity("train_400.csv", best_depth, best_min_data_records)
         print(depth_range, depth_error_rate, best_depth)
         print(min_data_records_list, data_records_error_rate, best_min_data_records)
         print(node_purity_list, node_purity_error_rate, best_node_purity)
 
         data = csv_to_array(parameter)
-        tree = _grow_tree(data, 4, 25, best_node_purity)
+        tree = _grow_tree(data, best_depth, best_min_data_records, (best_node_purity*0.01))
         writeClassifierProgram(tree)
         data = csv_to_array(parameter)
-        accuracy = check_accuracy(data, 4, 25, 70)
+        accuracy = check_accuracy(data, best_depth, best_min_data_records, (best_node_purity*0.01))
         print(accuracy)
 
