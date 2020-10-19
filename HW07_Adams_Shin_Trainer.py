@@ -551,9 +551,6 @@ def check_data_records(filename, best_depth):
     plt.savefig('MinNodeSize.png')
     plt.show()
 
-    print("The x value: {0}".format(depth_range))
-    print("The y value: {0}".format(error_rate))
-
     print("=================================================")
     index_of_min_error_rate = error_rate.index(min(error_rate))
     return min_data_records_list, error_rate, min_data_records_list[index_of_min_error_rate]
