@@ -12,7 +12,7 @@ def csv_to_array_trained(csv_filename):
 
 
 def predict(data):
-	classifications_filename = "HW05_Adams_MyClassifications.csv"
+	classifications_filename = "OUR_CLASSIFICATIONS.csv"
 	file_object = open(classifications_filename, "wt")  # create file
 
 	for row in data:

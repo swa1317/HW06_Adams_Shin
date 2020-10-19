@@ -437,7 +437,7 @@ def csv_to_array_trained(csv_filename):
 # that predict the class. The if-then statements are written using the decision tree in lines 294-330 of this file
 predict_string = '''
 def predict(data):
-\tclassifications_filename = "HW05_Adams_MyClassifications.csv"
+\tclassifications_filename = "OUR_CLASSIFICATIONS.csv"
 \tfile_object = open(classifications_filename, "wt")  # create file
 
 \tfor row in data:
